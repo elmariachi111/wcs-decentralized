@@ -1,4 +1,4 @@
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, useEffect, useState } from 'react';
 import logo from './logo.svg';
 import './css/App.css';
 import SignupStyles from './css/SignupAttendee.module.scss';
@@ -64,18 +64,26 @@ const SignupAttendee = ({ onAdded }: { onAdded: (attendee: Attendee) => void }) 
 
 const App: React.FC = () => {
 
-  const [attendees, setAttendees] = useState([{
-    name: "Stefan",
-    email: "stadolf@gmail.com",
-    rsvp: true
-  }]);
+  const [attendees, setAttendees] = useState<Attendee[]>([]);
 
   const addAttendee = (attendee: Attendee) => {
-    setAttendees([...attendees, attendee]);
+    const newAttendees: Attendee[] = [...attendees, attendee];
+    localStorage.setItem("attendees", JSON.stringify(newAttendees));
+    setAttendees(newAttendees);
   }
+
+  useEffect(() => {
+    const storedAttendees = localStorage.getItem("attendees");
+    if (storedAttendees) {
+      setAttendees(JSON.parse(storedAttendees));
+    }
+  }, []);
 
   return (
     <div className="App">
+      <header style={{ fontSize: "2em" }}>
+        Signup for my Birthday
+      </header>
       <main>
         <AttendeeList attendees={attendees} />
         <SignupAttendee onAdded={addAttendee} />
