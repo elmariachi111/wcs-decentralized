@@ -115,16 +115,16 @@ const App: React.FC = () => {
 
   useEffect(() => {
     (async () => {
-      if (!ipfsNode) {
-        const ipfs = await IPFS.create({
-          config: {
-            Addresses: {
-              Swarm: ['/dns4/ipfs.depa.digital/tcp/9091/wss/p2p-webrtc-star'],
-            },
-          }
-        });
-        setIpfsNode(ipfs);
-      }
+
+      const ipfs = await IPFS.create({
+        config: {
+          Addresses: {
+            Swarm: ['/dns4/ipfs.depa.digital/tcp/9091/wss/p2p-webrtc-star'],
+          },
+        }
+      });
+      setIpfsNode(ipfs);
+
     })();
   }, [])
   return (
