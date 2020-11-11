@@ -1,0 +1,22 @@
+.form {
+  div {
+    display: flex;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  input[type="text"],
+  input[type="email"] {
+    min-width: 400px;
+    font-size: 20px;
+    padding: 0.5em;
+  }
+
+  label {
+    margin-right: 1rem;
+  }
+  button {
+    font-size: 20px;
+    padding: 0.5rem;
+  }
+}
