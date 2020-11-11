@@ -1,5 +1,4 @@
 import React, { FormEvent, useEffect, useState } from 'react';
-import logo from './logo.svg';
 import './css/App.css';
 import SignupStyles from './css/SignupAttendee.module.scss';
 import AttendeeListStyles from './css/AttendeeList.module.scss';
