@@ -1,7 +1,23 @@
 .App {
   text-align: center;
 }
-
+.App header {
+  display: block;
+  font-size: 2em;
+}
+.App header small {
+  font-size: 0.5em;
+  color: #777;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90vw;
+}
+.App main {
+  display: flex;
+  flex-direction: column;
+}
 .App-logo {
   height: 40vmin;
   pointer-events: none;

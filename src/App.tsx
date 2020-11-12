@@ -1,7 +1,10 @@
+import IPFS from 'ipfs-core';
+import OrbitDB from 'orbit-db';
 import React, { FormEvent, useEffect, useState } from 'react';
 import './css/App.css';
-import SignupStyles from './css/SignupAttendee.module.scss';
 import AttendeeListStyles from './css/AttendeeList.module.scss';
+import SignupStyles from './css/SignupAttendee.module.scss';
+
 type email = string;
 
 interface Attendee {
@@ -54,9 +57,9 @@ const SignupAttendee = ({ onAdded }: { onAdded: (attendee: Attendee) => void }) 
     </div>
     <div>
       <label htmlFor="rsvp">I&apos;m coming!</label>
-      <input name="rsvp" type="checkbox" checked={rsvp} onClick={() => setRsvp(!rsvp)} />
+      <input name="rsvp" type="checkbox" checked={rsvp} onChange={() => setRsvp(!rsvp)} />
     </div>
-    <button type="submit">Submit</button>
+    <button type="submit">Submit.</button>
   </form>
 
 }
@@ -65,23 +68,70 @@ const App: React.FC = () => {
 
   const [attendees, setAttendees] = useState<Attendee[]>([]);
 
-  const addAttendee = (attendee: Attendee) => {
-    const newAttendees: Attendee[] = [...attendees, attendee];
-    localStorage.setItem("attendees", JSON.stringify(newAttendees));
-    setAttendees(newAttendees);
+  const [ipfsNode, setIpfsNode] = useState<any>();
+  const [attendeeDb, setAttendeeDb] = useState<any>();
+
+  const addAttendee = async (attendee: Attendee) => {
+    const hash = await attendeeDb.put(attendee);
+    console.log(hash);
+    reloadAttendees(attendeeDb);
+  }
+
+  const reloadAttendees = async (db: any) => {
+    const atts = await db.query((doc: Attendee) => true);
+    setAttendees(atts);
   }
 
   useEffect(() => {
-    const storedAttendees = localStorage.getItem("attendees");
-    if (storedAttendees) {
-      setAttendees(JSON.parse(storedAttendees));
+    if (attendeeDb) {
+      reloadAttendees(attendeeDb);
     }
-  }, []);
+  }, [attendeeDb]);
 
+  useEffect(() => {
+    if (!ipfsNode)
+      return;
+
+    (async () => {
+      const orbitDb = await OrbitDB.createInstance(ipfsNode);
+      const db = await orbitDb.docs('orbit.users.birthday.1', {
+        indexBy: 'email',
+        accessController: {
+          write: ['*'] // Give write access to everyone
+        }
+      })
+      db.events.on('replicate', (address: string) => console.debug("replicate", address))
+      db.events.on('replicated', (address: string) => console.log("replicated", address))
+      db.events.on('replicate.progress', (address: string) => console.debug("replicate.progress", address))
+      db.events.on('load', (dbname: string) => console.debug("start loading", dbname))
+      db.events.on('ready', (dbname: string) => console.log("ready", dbname))
+      db.events.on('replicated', () => reloadAttendees(db));
+
+      await db.load();
+      setAttendeeDb(db);
+    })();
+
+  }, [ipfsNode]);
+
+  useEffect(() => {
+    (async () => {
+
+      const ipfs = await IPFS.create({
+        config: {
+          Addresses: {
+            Swarm: ['/dns4/ipfs.depa.digital/tcp/9091/wss/p2p-webrtc-star'],
+          },
+        }
+      });
+      setIpfsNode(ipfs);
+
+    })();
+  }, [])
   return (
     <div className="App">
-      <header style={{ fontSize: "2em" }}>
+      <header>
         Signup for my Birthday
+        {attendeeDb && <small>{attendeeDb.address.toString()}</small>}
       </header>
       <main>
         <AttendeeList attendees={attendees} />
