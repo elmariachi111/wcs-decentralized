@@ -4,9 +4,7 @@ import { useIpfs } from './ipfs.context';
 
 const useOrbitDb = () => {
   const {ipfs} = useIpfs();
-  
   const [odb, setOdb] = useState<any>();
-  //const [attendeeDb, setAttendeeDb] = useState<any>();
 
   const newDocsDb = async (name: string) => {
     const db = await odb.docs(name, {
@@ -31,7 +29,7 @@ const useOrbitDb = () => {
     if (!ipfs) return;
     (async () => {
       const orbitDb = await OrbitDB.createInstance(ipfs);
-      console.log(orbitDb.identity.toJSON());
+      console.log("Identity", orbitDb.identity.toJSON());
       setOdb(orbitDb);
     })();
 

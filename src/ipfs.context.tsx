@@ -36,7 +36,7 @@ const IPFSProvider = ({ children }: {
         }
       });
       const ipfsId = await ipfs.id();
-      console.log('ipfs node (v%s) is running [id: %s]', ipfsId.agentVersion, ipfsId);
+      console.log('ipfs node (v%s) is running [id: %s]', ipfsId.agentVersion, ipfsId.id);
       setIpfsNode(ipfs);
     })();
   }, [])

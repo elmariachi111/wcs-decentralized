@@ -1,40 +1,60 @@
-import React from "react";
-import { FormEvent, useState } from "react";
+import { Button } from "@chakra-ui/button";
+import { Checkbox } from "@chakra-ui/checkbox";
+import { FormControl, FormHelperText, FormLabel } from "@chakra-ui/form-control";
+import { Input } from "@chakra-ui/input";
+import { Box } from "@chakra-ui/layout";
+import React, { FormEvent, useState } from "react";
 import { Attendee } from "../../types/Attendee";
-import SignupStyles from './SignupAttendee.module.scss';
 
-const SignupAttendee = ({ onAdded }: { onAdded: (attendee: Attendee) => void }) => {
+const DEFAULT_ATTENDEE = {
+  name: "",
+  email: "",
+  rsvp: false
+};
 
-  const [name, setName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [rsvp, setRsvp] = useState<boolean>(false);
+const SignupAttendee = ({ add }: { add: (attendee: Attendee) => void }) => {
 
+  const [attendee, setAttendee] = useState<Attendee>(DEFAULT_ATTENDEE)
   const submit = (e: FormEvent) => {
     e.preventDefault();
+    console.log(attendee);
 
-    const attendee: Attendee = {
-      name, email, rsvp
-    }
-    onAdded(attendee);
-    setName(""); setEmail(""); setRsvp(false)
+    add(attendee);
+    setAttendee(DEFAULT_ATTENDEE)
   }
 
-  return <form onSubmit={submit} className={SignupStyles.form}>
-    <div>
-      <label htmlFor="name">Name</label>
-      <input type="text" name="name" value={name} onChange={(e) => setName(e.target.value)} />
-    </div>
-    <div>
-      <label htmlFor="email">Email</label>
-      <input type="text" name="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-    </div>
-    <div>
-      <label htmlFor="rsvp">I&apos;m coming!</label>
-      <input name="rsvp" type="checkbox" checked={rsvp} onChange={() => setRsvp(!rsvp)} />
-    </div>
-    <button type="submit">Submit.</button>
-  </form>
-
+  const handler = (field: string) => {
+    return (evt: any) => {
+      setAttendee(old => {
+        return {
+          ...old,
+          [field]: evt.target.value || evt.target.checked
+        }
+      })
+    }
+  }
+  return (
+    <Box bg="gray.700" p={3} my={5}>
+      <form onSubmit={submit}>
+        <FormControl id="name">
+          <FormLabel>Name</FormLabel>
+          <Input variant="filled" type="text" name="name" onChange={handler("name")} value={attendee.name} />
+          <FormHelperText></FormHelperText>
+        </FormControl>
+        <FormControl id="email">
+          <FormLabel>Email address</FormLabel>
+          <Input variant="filled" name="email" type="email" onChange={handler("email")} value={attendee.email}/>
+          <FormHelperText>careful. this will be public</FormHelperText>
+        </FormControl>
+        <FormControl my={3}>
+          <Checkbox name="rsvp" onChange={handler("rsvp")} isChecked={attendee.rsvp}>
+            Count me in.
+          </Checkbox>
+        </FormControl>
+        <Button my={5} type="submit" colorScheme="teal">Submit.</Button>
+      </form>
+    </Box>
+  )
 }
 
 export default SignupAttendee

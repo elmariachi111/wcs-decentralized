@@ -1,16 +1,22 @@
+import { extendTheme, ChakraProvider, Container } from "@chakra-ui/react"
 import React from 'react';
 import AttendeeApp from './components/AttendeeApp';
-import './css/App.css';
 import { IPFSProvider } from './ipfs.context';
 
-const App: React.FC = () => {
+const customTheme = extendTheme({ config: {
+  initialColorMode: "dark"
+} })
 
+const App: React.FC = () => {
+  
   return (
-    <IPFSProvider>
-      <div className="App">
-        <AttendeeApp />
-      </div>
-    </IPFSProvider>
+    <ChakraProvider theme={customTheme}>
+      <IPFSProvider>
+        <Container maxW="xl">
+          <AttendeeApp />
+        </Container>
+      </IPFSProvider>
+    </ChakraProvider>
   );
 }
 
