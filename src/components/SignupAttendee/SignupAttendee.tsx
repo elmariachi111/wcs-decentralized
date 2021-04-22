@@ -17,8 +17,6 @@ const SignupAttendee = ({ add }: { add: (attendee: Attendee) => void }) => {
   const [attendee, setAttendee] = useState<Attendee>(DEFAULT_ATTENDEE)
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    console.log(attendee);
-
     add(attendee);
     setAttendee(DEFAULT_ATTENDEE)
   }

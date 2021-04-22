@@ -1,16 +1,15 @@
-import { Button } from "@chakra-ui/button";
 import { Box, Code, Flex, Heading, Text } from "@chakra-ui/layout";
-import React from "react";
-import { useEffect, useState } from "react";
-import { useOrbitDb } from "../orbitdb.hook";
+import React, { useEffect, useState } from "react";
+import { useIpfs } from "../ipfs.context";
 import { Attendee } from "../types/Attendee";
 import AttendeeList from "./AttendeeList/AttendeeList";
+import ConnectDb from "./ConnectDb";
 import SignupAttendee from "./SignupAttendee/SignupAttendee";
 
 const AttendeeApp = () => {
   const [attendees, setAttendees] = useState<Attendee[]>([]);
-  
-  const {odb, newDocsDb} = useOrbitDb();
+  const {ipfs} = useIpfs();
+
   const [attendeeDb, setAttendeeDb] = useState<any>();
 
   const reloadAttendees = async () => {
@@ -19,8 +18,10 @@ const AttendeeApp = () => {
   }
 
   const addAttendee = async (attendee: Attendee) => {
-    const hash = await attendeeDb.put(attendee);
-    console.log(hash);
+    const hash = await attendeeDb.put(attendee,  { pin: true });
+    const dagEntry = await ipfs?.dag.get(hash);
+    console.log(hash, dagEntry);
+
     reloadAttendees();
   }
 
@@ -33,7 +34,9 @@ const AttendeeApp = () => {
   }
 
   const deleteAttendee = async(mail: string) => {
-    await attendeeDb.del(mail);
+    const hash = await attendeeDb.del(mail);
+    const dagEntry = await ipfs?.dag.get(hash);
+    console.log(hash, dagEntry);
     reloadAttendees();
   }
   
@@ -44,40 +47,25 @@ const AttendeeApp = () => {
     }
   }, [attendeeDb]);
 
-  useEffect(() => {
-    if (!odb) return;
-    (async() => {
-      const db = await newDocsDb('orbit.users.birthday')
-      setAttendeeDb(db);
-    })()
-  }, [odb])
 
-  const connect = () => { }
   return (
     <Box my={5}>
-    <Heading size="xl" textAlign="center">
-      Signup for my Birthday 
-    </Heading>
-    <Flex my={5} justifyContent="center">
-    { attendeeDb ?
-      <Flex direction="column">
-        <Text size="sm" mr={3} whiteSpace="nowrap">connected to: </Text>
-        <Code p={2}>{attendeeDb.address.toString()}</Code>
-      </Flex>
-      : 
-      <Button onClick={connect}>connect</Button>
-    }
-    </Flex>
 
-    {attendeeDb &&
-      <main>
-        <Heading size="lg">Attendees</Heading>
-        <AttendeeList attendees={attendees} toggleRsvp={toggleRsvp} deleteAttendee={deleteAttendee}/>
-        <Heading size="lg">Signup</Heading>
-        <SignupAttendee add={addAttendee} />
-      </main>
-    }
-  </Box>
+      <Heading size="xl" textAlign="center">
+        Signup for my Birthday 
+      </Heading>
+      <Flex my={5} direction="column" justifyContent="center">
+        <ConnectDb onConnected={setAttendeeDb} />
+        { attendeeDb && 
+          <Box my={3}>
+            <Heading size="lg">Attendees</Heading>
+            <AttendeeList attendees={attendees} toggleRsvp={toggleRsvp} deleteAttendee={deleteAttendee}/>
+            <Heading size="lg">Signup</Heading>
+            <SignupAttendee add={addAttendee} />
+          </Box>
+        }
+      </Flex>
+    </Box>
   )
 }
 export default AttendeeApp
