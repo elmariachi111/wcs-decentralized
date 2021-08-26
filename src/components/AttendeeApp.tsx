@@ -52,7 +52,7 @@ const AttendeeApp = () => {
     <Box my={5}>
 
       <Heading size="xl" textAlign="center">
-        Signup for my Birthday 
+        Join this event 
       </Heading>
       <Flex my={5} direction="column" justifyContent="center">
         <ConnectDb onConnected={setAttendeeDb} />
